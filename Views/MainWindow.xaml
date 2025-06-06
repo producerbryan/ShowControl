@@ -1,0 +1,302 @@
+﻿<Window x:Class="ShowControl.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Professional Show Control System" 
+        Height="900" Width="1600"
+        WindowState="Maximized"
+        KeyDown="Window_KeyDown">
+
+    <Window.InputBindings>
+        <KeyBinding Key="PageDown" Command="{Binding NextCueCommand}"/>
+        <KeyBinding Key="PageUp" Command="{Binding PreviousCueCommand}"/>
+        <KeyBinding Key="Space" Command="{Binding PlayPauseCommand}"/>
+        <KeyBinding Key="Escape" Command="{Binding StopAllCommand}"/>
+        <KeyBinding Key="F1" Command="{Binding BlackoutCommand}"/>
+    </Window.InputBindings>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Menu Bar -->
+        <Menu Grid.Row="0">
+            <MenuItem Header="_File">
+                <MenuItem Header="_New Project" Command="{Binding NewProjectCommand}" InputGestureText="Ctrl+N"/>
+                <MenuItem Header="_Open Project" Command="{Binding OpenProjectCommand}" InputGestureText="Ctrl+O"/>
+                <MenuItem Header="_Save Project" Command="{Binding SaveProjectCommand}" InputGestureText="Ctrl+S"/>
+                <MenuItem Header="Save _As..." Command="{Binding SaveAsProjectCommand}" InputGestureText="Ctrl+Shift+S"/>
+                <Separator/>
+                <MenuItem Header="Recent Projects" Name="RecentProjectsMenu"/>
+                <Separator/>
+                <MenuItem Header="E_xit" Command="{Binding ExitCommand}" InputGestureText="Alt+F4"/>
+            </MenuItem>
+            <MenuItem Header="_Edit">
+                <MenuItem Header="_Undo" Command="{Binding UndoCommand}" InputGestureText="Ctrl+Z"/>
+                <MenuItem Header="_Redo" Command="{Binding RedoCommand}" InputGestureText="Ctrl+Y"/>
+                <Separator/>
+                <MenuItem Header="_Preferences" Command="{Binding PreferencesCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_Show">
+                <MenuItem Header="_Go (Next Cue)" Command="{Binding NextCueCommand}" InputGestureText="Page Down"/>
+                <MenuItem Header="_Back" Command="{Binding PreviousCueCommand}" InputGestureText="Page Up"/>
+                <MenuItem Header="_Stop All" Command="{Binding StopAllCommand}" InputGestureText="Esc"/>
+                <MenuItem Header="_Blackout" Command="{Binding BlackoutCommand}" InputGestureText="F1"/>
+                <Separator/>
+                <MenuItem Header="_Reset Show" Command="{Binding ResetShowCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_Tools">
+                <MenuItem Header="_DMX Monitor" Command="{Binding DmxMonitorCommand}"/>
+                <MenuItem Header="_Audio Analyzer" Command="{Binding AudioAnalyzerCommand}"/>
+                <MenuItem Header="_Fixture Library" Command="{Binding FixtureLibraryCommand}"/>
+                <MenuItem Header="_StreamDeck Setup" Command="{Binding StreamDeckSetupCommand}"/>
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_User Manual" Command="{Binding UserManualCommand}"/>
+                <MenuItem Header="_About" Command="{Binding AboutCommand}"/>
+            </MenuItem>
+        </Menu>
+
+        <!-- Main Content Area -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="350"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="300"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Panel - Cue Sheet -->
+            <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="0,0,1,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="CUE SHEET" FontWeight="Bold" Margin="10,10,10,5"/>
+
+                    <!-- Cue List -->
+                    <DataGrid Grid.Row="1" 
+                              Name="CueDataGrid"
+                              ItemsSource="{Binding Cues}"
+                              SelectedItem="{Binding SelectedCue}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="True"
+                              CanUserDeleteRows="True"
+                              GridLinesVisibility="Horizontal"
+                              HeadersVisibility="Column"
+                              SelectionMode="Single"
+                              Margin="10,0,10,10">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Cue #" Binding="{Binding Number}" Width="50"/>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="150"/>
+                            <DataGridTextColumn Header="Duration" Binding="{Binding Duration, StringFormat=mm\\:ss\\.ff}" Width="80"/>
+                            <DataGridCheckBoxColumn Header="Auto" Binding="{Binding AutoFollow}" Width="40"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Cue Controls -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+                        <Button Content="GO" Command="{Binding NextCueCommand}" Width="60" Height="30" Margin="5" FontWeight="Bold"/>
+                        <Button Content="BACK" Command="{Binding PreviousCueCommand}" Width="60" Height="30" Margin="5"/>
+                        <Button Content="STOP" Command="{Binding StopAllCommand}" Width="60" Height="30" Margin="5"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Background="LightGray"/>
+
+            <!-- Center Panel - Timeline and Waveform -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="200"/>
+                    <RowDefinition Height="5"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="TIMELINE &amp; WAVEFORM" FontWeight="Bold" Margin="10,10,10,5"/>
+
+                <!-- Waveform Display -->
+                <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="1" Margin="10,0,10,10">
+                    <Canvas Name="WaveformCanvas" Background="Black">
+                        <TextBlock Text="Waveform will appear here" Foreground="White" 
+                                   Canvas.Left="10" Canvas.Top="10"/>
+                    </Canvas>
+                </Border>
+
+                <GridSplitter Grid.Row="2" HorizontalAlignment="Stretch" Background="LightGray"/>
+
+                <!-- Timeline Editor -->
+                <Border Grid.Row="3" BorderBrush="Gray" BorderThickness="1" Margin="10,0,10,10">
+                    <ScrollViewer Name="TimelineScrollViewer" 
+                                  HorizontalScrollBarVisibility="Auto" 
+                                  VerticalScrollBarVisibility="Auto">
+                        <Canvas Name="TimelineCanvas" Background="#1E1E1E" MinHeight="400" MinWidth="800">
+                            <TextBlock Text="Timeline editor will appear here" Foreground="White" 
+                                       Canvas.Left="10" Canvas.Top="10"/>
+                        </Canvas>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+
+            <GridSplitter Grid.Column="3" HorizontalAlignment="Stretch" Background="LightGray"/>
+
+            <!-- Right Panel - Controls -->
+            <Border Grid.Column="4" BorderBrush="Gray" BorderThickness="1,0,0,0">
+                <TabControl>
+                    <TabItem Header="DMX">
+                        <Grid Margin="10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Text="DMX CONTROL" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                                <StackPanel Name="DmxControlPanel">
+                                    <!-- DMX controls will be populated here -->
+                                </StackPanel>
+                            </ScrollViewer>
+
+                            <StackPanel Grid.Row="2" Margin="0,10,0,0">
+                                <Slider Name="MasterIntensity" Minimum="0" Maximum="1" Value="1" 
+                                        Orientation="Horizontal" TickFrequency="0.1" IsSnapToTickEnabled="True"/>
+                                <TextBlock Text="Master Intensity" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </TabItem>
+
+                    <TabItem Header="Audio">
+                        <Grid Margin="10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Text="AUDIO CONTROL" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                            <StackPanel Grid.Row="1">
+                                <GroupBox Header="Output Routing" Margin="0,0,0,10">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,5">
+                                            <TextBlock Text="Main:" Width="60"/>
+                                            <ComboBox Name="MainOutputCombo" Width="100"/>
+                                            <Slider Name="MainVolumeSlider" Width="80" Margin="10,0" Minimum="0" Maximum="1" Value="1"/>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,5">
+                                            <TextBlock Text="Click:" Width="60"/>
+                                            <ComboBox Name="ClickOutputCombo" Width="100"/>
+                                            <Slider Name="ClickVolumeSlider" Width="80" Margin="10,0" Minimum="0" Maximum="1" Value="0.7"/>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,5">
+                                            <TextBlock Text="IEM:" Width="60"/>
+                                            <ComboBox Name="IemOutputCombo" Width="100"/>
+                                            <Slider Name="IemVolumeSlider" Width="80" Margin="10,0" Minimum="0" Maximum="1" Value="0.8"/>
+                                        </StackPanel>
+
+                                        <Button Grid.Row="3" Content="Configure Audio Devices" Margin="0,10"/>
+                                    </Grid>
+                                </GroupBox>
+
+                                <GroupBox Header="Beat Detection">
+                                    <StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,5">
+                                            <TextBlock Text="BPM:" Width="60"/>
+                                            <TextBox Name="BpmTextBox" Width="80" Text="120"/>
+                                            <Button Content="Tap" Name="TapTempoButton" Width="50" Margin="10,0,0,0"/>
+                                        </StackPanel>
+
+                                        <CheckBox Content="Auto-detect beats" IsChecked="True" Margin="0,5"/>
+                                        <CheckBox Content="Use click track for timing" IsChecked="False" Margin="0,5"/>
+                                    </StackPanel>
+                                </GroupBox>
+                            </StackPanel>
+                        </Grid>
+                    </TabItem>
+
+                    <TabItem Header="Manual">
+                        <Grid Margin="10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Text="MANUAL CONTROL" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                            <StackPanel Grid.Row="1">
+                                <GroupBox Header="House Lights" Margin="0,0,0,10">
+                                    <Slider Name="HouseLightsSlider" Minimum="0" Maximum="1" Value="0" 
+                                            Orientation="Horizontal"/>
+                                </GroupBox>
+
+                                <GroupBox Header="Fog/Haze" Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <Slider Name="FogSlider" Minimum="0" Maximum="1" Value="0" 
+                                                Orientation="Horizontal" Margin="0,0,0,5"/>
+                                        <Button Content="Fog Burst" Name="FogBurstButton"/>
+                                    </StackPanel>
+                                </GroupBox>
+
+                                <GroupBox Header="Wash Lights" Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <Slider Name="WashIntensitySlider" Minimum="0" Maximum="1" Value="0" 
+                                                Orientation="Horizontal" Margin="0,0,0,5"/>
+                                        <TextBlock Text="Wash Intensity" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </GroupBox>
+
+                                <GroupBox Header="Emergency">
+                                    <Button Content="BLACKOUT" Name="BlackoutButton" Height="40" 
+                                            Background="Red" Foreground="White" FontWeight="Bold"/>
+                                </GroupBox>
+                            </StackPanel>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </Border>
+        </Grid>
+
+        <!-- Status Bar -->
+        <StatusBar Grid.Row="2" Height="30">
+            <StatusBarItem>
+                <TextBlock Name="ShowStatusText" Text="Show: Stopped"/>
+            </StatusBarItem>
+            <Separator/>
+            <StatusBarItem>
+                <TextBlock Name="CurrentCueText" Text="Current Cue: None"/>
+            </StatusBarItem>
+            <Separator/>
+            <StatusBarItem>
+                <TextBlock Name="TimeDisplay" Text="00:00:00"/>
+            </StatusBarItem>
+            <Separator/>
+            <StatusBarItem>
+                <TextBlock Name="DmxStatusText" Text="DMX: Disconnected"/>
+            </StatusBarItem>
+            <Separator/>
+            <StatusBarItem>
+                <TextBlock Name="StreamDeckStatusText" Text="StreamDeck: Disconnected"/>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>

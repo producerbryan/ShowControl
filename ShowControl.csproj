@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+		<ApplicationIcon>icon.ico</ApplicationIcon>
+		<AssemblyTitle>Professional Show Control System</AssemblyTitle>
+		<AssemblyDescription>Advanced lighting, audio, and video show control software</AssemblyDescription>
+		<AssemblyVersion>1.0.0.0</AssemblyVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="NAudio" Version="2.2.1" />
+		<PackageReference Include="NAudio.WinMM" Version="2.2.1" />
+		<PackageReference Include="NAudio.Midi" Version="2.2.1" />
+		<PackageReference Include="MediaFoundation.NET" Version="1.0.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="System.IO.Ports" Version="8.0.0" />
+		<PackageReference Include="StreamDeckSharp" Version="6.1.0" />
+		<PackageReference Include="OxyPlot.Wpf" Version="2.1.2" />
+		<PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.1.2" />
+		<PackageReference Include="WindowsAPICodePack-Shell" Version="1.1.1" />
+		<PackageReference Include="DirectShowLib" Version="1.0.0" />
+		<PackageReference Include="FFMpegCore" Version="5.0.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Core\" />
+		<Folder Include="Controls\" />
+		<Folder Include="Resources\" />
+		<Folder Include="Utilities\" />
+	</ItemGroup>
+
+</Project>
